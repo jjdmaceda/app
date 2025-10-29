@@ -6,7 +6,7 @@ import BlockModal from './components/BlockModal';
 import './index.css';
 
 // Mount Sidebar to #sidebar-root
-const sidebarRoot = document.getElementById('sidebar-root');
+const sidebarRoot = document.getElementById('ubr-sidebar-root');
 if (sidebarRoot) {
   const sidebarApp = ReactDOM.createRoot(sidebarRoot);
   sidebarApp.render(
@@ -31,7 +31,7 @@ if (sidebarRoot) {
 // Mount Modal (triggered via global event or prop)
 let modalRoot = null;
 window.openBlockModal = (isOpen, onSelect) => {
-  const modalContainer = document.getElementById('modal-root');
+  const modalContainer = document.getElementById('ubr-modal-root');
   if (modalContainer) {
     if (!modalRoot) modalRoot = ReactDOM.createRoot(modalContainer);
     modalRoot.render(<BlockModal isOpen={isOpen} onClose={() => window.openBlockModal(false, () => {})} onSelect={onSelect} />);

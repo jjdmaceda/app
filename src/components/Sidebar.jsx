@@ -58,20 +58,20 @@ function SortableItem({ id, title, isDragging, onEdit, onDelete, menuOpen, toggl
         {title}
       </a>
       {/* Kebab menu - Right side */}
-      <div className="relative ml-3 flex-shrink-0 z-[10000] cursor-pointer">
+      <div className="relative ml-3 flex-shrink-0 _z-[10000] cursor-pointer">
         <button
           onClick={(e) => {
             e.stopPropagation();
             toggleMenu(id);
           }}
-          className="cursor-pointer text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+          className="cursor-pointer text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors relative z-10"
           aria-label="More options"
         >
-          <span className="text-sm">⋮</span>
+          <span className="text-xl font-bold relative">⋮</span>
         </button>
         {/* Dropdown Menu */}
         {menuOpen === id && (
-          <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-[10001]">
+          <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-[10000]">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -232,41 +232,41 @@ const Sidebar = () => {
   };
 
   // On drag end: Reorder locally + API sync
-  const handleDragEnd = async (event) => {
+  const handleDragEnd = (event) => {
     const { active, over } = event;
 
-    if (active.id !== over.id) {
-      setSections((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
+    setActiveId(null);  // Always end drag state
 
-        const newSections = arrayMove(items, oldIndex, newIndex);
-        return newSections;
-      });
+    if (!over || active.id === over.id) {
+      return;
     }
 
-    setActiveId(null);  // End overlay
+    setSections((items) => {
+      const oldIndex = items.findIndex((item) => item.id === active.id);
+      const newIndex = items.findIndex((item) => item.id === over.id);
+      const newItems = arrayMove(items, oldIndex, newIndex);
 
-    // Sync to API
-    const blockOrder = sections.map(sec => parseInt(sec.id));  // Updated array
-    try {
-      const response = await fetch(`/wp-json/unicorn-builder/v1/page-blocks-reorder/${currentPageId}`, {
+      // Sync to API using the NEW order (fixed: was using old sections before)
+      const blockOrder = newItems.map(sec => parseInt(sec.id));
+      fetch(`/wp-json/unicorn-builder/v1/page-blocks-reorder/${currentPageId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-WP-Nonce': window.ubrData?.nonce || ''
         },
         body: JSON.stringify({ block_order: blockOrder })
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error('Reorder failed');
+        }
+        console.log('Reordered successfully');
+      }).catch(err => {
+        console.error('API Reorder Error:', err);
+        fetchPageBlocks();  // Revert on error
       });
 
-      if (!response.ok) {
-        throw new Error('Reorder failed');
-      }
-      console.log('Reordered successfully');
-    } catch (err) {
-      console.error('API Reorder Error:', err);
-      fetchPageBlocks();  // Revert
-    }
+      return newItems;
+    });
   };
 
   const handleAddSection = () => {
