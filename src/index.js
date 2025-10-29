@@ -1,17 +1,39 @@
 import React from 'react';
+import { ToastContainer } from 'react-toastify';  // New import
 import ReactDOM from 'react-dom/client';
+import Sidebar from './components/Sidebar';
+import BlockModal from './components/BlockModal';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+// Mount Sidebar to #sidebar-root
+const sidebarRoot = document.getElementById('sidebar-root');
+if (sidebarRoot) {
+  const sidebarApp = ReactDOM.createRoot(sidebarRoot);
+  sidebarApp.render(
+    <>
+      <Sidebar />
+      <ToastContainer
+        position="top-right"  // Or "bottom-right", etc.
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"  // Or "dark", "colored"
+      />
+    </>
+  );
+}
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// Mount Modal (triggered via global event or prop)
+let modalRoot = null;
+window.openBlockModal = (isOpen, onSelect) => {
+  const modalContainer = document.getElementById('modal-root');
+  if (modalContainer) {
+    if (!modalRoot) modalRoot = ReactDOM.createRoot(modalContainer);
+    modalRoot.render(<BlockModal isOpen={isOpen} onClose={() => window.openBlockModal(false, () => {})} onSelect={onSelect} />);
+  }
+};
