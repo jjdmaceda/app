@@ -1,7 +1,16 @@
 // EditModal.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 function EditModal({ isOpen, onClose, blockId, pageId }) {
+  const [isIframeLoaded, setIsIframeLoaded] = useState(false);
+
+  // Reset loading state every time modal opens to ensure spinner shows
+  useEffect(() => {
+    if (isOpen) {
+      setIsIframeLoaded(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen || !blockId) return null;
 
   // Assuming block ID corresponds to a WordPress post ID for editing.
@@ -11,7 +20,7 @@ function EditModal({ isOpen, onClose, blockId, pageId }) {
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-        <div className="absolute top-0 left-0 w-full h-full bg-black opacity-40"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-black opacity-40"></div>
       <div className="bg-white rounded-lg w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden relative">
         {/* Modal Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -25,13 +34,22 @@ function EditModal({ isOpen, onClose, blockId, pageId }) {
             </svg>
           </button>
         </div>
-        {/* Iframe Content */}
-        <iframe
-          src={iframeSrc}
-          className="w-full flex-1 border-0"
-          title={`Edit Block ${blockId}`}
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-        />
+        {/* Iframe Content with Loading Overlay */}
+        <div className="relative w-full flex-1">
+          <iframe
+            src={iframeSrc}
+            className="w-full h-full border-0"
+            title={`Edit Block ${blockId}`}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+            onLoad={() => setIsIframeLoaded(true)}
+          />
+          {!isIframeLoaded && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-10">
+              <i className="fas fa-spinner fa-spin text-gray-900 text-2xl mb-2"></i>
+              <p className="text-sm text-gray-500">Loading editor...</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
