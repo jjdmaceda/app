@@ -45,7 +45,7 @@ function EditModal({ isOpen, onClose, blockId, pageId }) {
           />
           {!isIframeLoaded && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-10">
-              <i className="fas fa-spinner fa-spin text-gray-900 text-2xl mb-2"></i>
+              <i className="fas fa-spinner fa-spin text-gray-900 text-2xl mb-2 "></i>
               <p className="text-sm text-gray-500">Loading editor...</p>
             </div>
           )}
